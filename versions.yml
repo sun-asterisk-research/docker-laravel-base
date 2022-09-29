@@ -1,0 +1,26 @@
+php_versions:
+- 7.4.30
+- 8.0.23
+- 8.1.10
+
+composer_version: 2.4.1
+
+alpine_releases:
+- alpine3.16
+- alpine3.15
+
+debian_releases:
+- bullseye
+- buster
+
+default_php_version: 8.1
+default_php_7_version: 7.4
+default_php_8_version: 8.1
+default_distro: debian
+default_alpine_release: alpine3.16
+default_debian_release: bullseye
+
+platforms:
+- linux/amd64
+- linux/arm
+- linux/arm64

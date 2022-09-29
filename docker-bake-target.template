@@ -1,0 +1,12 @@
+
+target "{{ bake_target }}" {
+    context = "./{{ php_minor }}/{{ distro_release }}"
+    cache-from = [
+        "${REGISTRY}/${REPO}:{{ php_minor }}-{{ distro_release }}"
+    ]
+    tags = {{ tags }}
+}
+
+target "{{ bake_target_minor_version }}" {
+    inherits = ["{{ bake_target }}"]
+}

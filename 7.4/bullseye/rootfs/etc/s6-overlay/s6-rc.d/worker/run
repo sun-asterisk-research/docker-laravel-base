@@ -1,0 +1,7 @@
+#!/command/with-contenv sh
+
+while IFS='=' read -r opt val; do
+    extra_opts="$extra_opts --$(echo "${opt#WORKER_}" | tr '[:upper:]' '[:lower:]')=$val"
+done < <(env | grep -E "^WORKER_.+=.+")
+
+exec su www-data -s /bin/sh -c "exec php ${APPLICATION_ROOT:-/srv/app}/artisan queue:${WORKER_COMMAND:-work} $extra_opts"

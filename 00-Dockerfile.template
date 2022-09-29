@@ -1,0 +1,1 @@
+FROM ghcr.io/sun-asterisk-research/php:{{ php_version }}-nginx-{{ distro_release }}

@@ -1,0 +1,85 @@
+#!/bin/sh
+
+set -eo pipefail
+
+is_true() {
+    if [ "$1" == "true" ] || [ "$1" == "yes" ]; then
+        true
+    else
+        false
+    fi
+}
+
+get_config() {
+    php artisan tinker --execute="echo config('$1')"
+}
+
+make_writable() {
+    chown :www-data "$1"
+
+    if [ -d "$1" ]; then
+        chmod 775 "$1"
+    else
+        chmod 664 "$1"
+    fi
+}
+
+mk_writable_dir() {
+    mkdir -p "$1"
+    make_writable "$1"
+}
+
+cd ${APPLICATION_ROOT:-/srv/app}
+
+if [ "${MODE:-full}" == "full" ] && [ -z $(get_config app.key) ]; then
+    export APP_KEY="$(php artisan key:generate --show)"
+    echo "$APP_KEY" > /var/run/s6/container_environment/APP_KEY
+fi
+
+if is_true "${LARAVEL_OPTIMIZE:-true}"; then
+    php artisan optimize
+fi
+
+db_type="$(get_config database.default)"
+
+if [ "$db_type" == "sqlite" ]; then
+    db_path="$(get_config database.connections.sqlite.database)"
+
+    if [ ! -f "$db_path" ]; then
+        mkdir -p "$(dirname $db_path)"
+        touch "$db_path"
+    fi
+
+    make_writable "$db_path"
+fi
+
+if is_true "${LARAVEL_LINK_STORAGE:-true}" && [ ! -e "public/storage" ]; then
+    mk_writable_dir storage/app/public
+    php artisan storage:link
+fi
+
+if is_true "${LARAVEL_RUN_MIGRATION:-true}"; then
+    if [ "$db_type" != "sqlite" ]; then
+        db_host="$(get_config database.connections.${db_type}.host)"
+        db_port="$(get_config database.connections.${db_type}.port)"
+        db_connection="${db_host}:${db_port}"
+
+        echo "info: waiting for database at $db_connection..."
+
+        nc -zw "${LARAVEL_MIGRATION_DB_WAIT_SECONDS:-60}" "$db_connection"
+
+        if [ "$?" != 0 ]; then
+            echo "fatal: timed out waiting for $db_connection"
+            exit 1
+        fi
+    fi
+
+    php artisan migrate --force
+fi
+
+if is_true "${LARAVEL_FIX_PERMISSIONS:-true}"; then
+    find storage/* bootstrap/cache -type d -exec chown :www-data {} \;
+    find storage/* bootstrap/cache -type d -exec chmod g+w {} \;
+    find storage/* bootstrap/cache -type f ! -name .gitignore -exec chown :www-data {} \;
+    find storage/* bootstrap/cache -type f ! -name .gitignore -exec chmod g+w {} \;
+fi

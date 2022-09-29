@@ -1,0 +1,11 @@
+variable "REGISTRY" {
+    default = "ghcr.io"
+}
+
+variable "REPO" {
+    default = "sun-asterisk-research/laravel-base"
+}
+
+group "default" {
+    targets = {{ targets }}
+}

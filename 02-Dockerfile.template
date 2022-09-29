@@ -1,0 +1,12 @@
+
+COPY rootfs /
+
+ENV APPLICATION_ROOT=/srv/app
+ENV DOCUMENT_ROOT=
+
+ENV PHP_FPM.pm=ondemand
+ENV PHP_FPM.pm.max_children=40
+
+WORKDIR /srv/app
+
+ENTRYPOINT [ "docker-entrypoint" ]
