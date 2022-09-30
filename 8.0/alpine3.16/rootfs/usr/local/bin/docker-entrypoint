@@ -27,11 +27,11 @@ get_config() {
 }
 
 if has_role "worker" && [ "$(get_config queue.default)" != "sync" ]; then
-    touch "/etc/s6-overlay/s6-rc.d/user/contents.d/worker"
+    touch "/etc/s6-overlay/s6-rc.d/user/contents.d/laravel-worker"
 fi
 
 if has_role "cron"; then
-    touch "/etc/s6-overlay/s6-rc.d/user/contents.d/cron"
+    touch "/etc/s6-overlay/s6-rc.d/user/contents.d/laravel-cron"
 fi
 
 if has_role "server"; then
