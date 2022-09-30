@@ -4,27 +4,11 @@ if [ "$#" != 0 ]; then
     exec "$@"
 fi
 
+source /opt/laravel/utils.sh
+
 mkdir -p /etc/s6-overlay/s6-rc.d/user/contents.d
 
 touch /etc/s6-overlay/s6-rc.d/user/contents.d/laravel-init
-
-if [ "${MODE:-full}" = "full" ]; then
-    MODE="server+worker+cron"
-fi
-
-has_role() {
-    roles_regexp=$(echo "$MODE" | sed 's/+/|/g')
-
-    if echo "$1" | grep -iqEw "^($roles_regexp)$"; then
-        true
-    else
-        false
-    fi
-}
-
-get_config() {
-    php artisan tinker --execute="echo config('$1')"
-}
 
 if has_role "worker" && [ "$(get_config queue.default)" != "sync" ]; then
     touch "/etc/s6-overlay/s6-rc.d/user/contents.d/laravel-worker"
