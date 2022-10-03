@@ -13,6 +13,7 @@ ENV DOCUMENT_ROOT=
 
 ENV PHP_FPM.pm=ondemand
 ENV PHP_FPM.pm.max_children=40
+ENV PHP_FPM.pm.process_idle_timeout=300s
 
 WORKDIR /srv/app
 
