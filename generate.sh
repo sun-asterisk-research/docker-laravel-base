@@ -6,7 +6,7 @@ source generate_utils.sh
 
 meta_from_full_tag() {
     local php_version distro_release
-    IFS='-' read php_version distro_release <<< $1
+    IFS='-' read php_version distro_release <<< "$1"
 
     if contains "$distro_release" "$debian_releases"; then
         local distro=debian
@@ -37,7 +37,7 @@ generate_dockerfile() {
 
     write_warn_edit $dockerfile
 
-    for tpl in $(ls *-Dockerfile*.template | grep -E "[0-9]+-Dockerfile(-${distro})?.template"); do
+    for tpl in $(ls Dockerfile*.template | grep -E "Dockerfile-[0-9]+(-${distro})?.template"); do
         tpl "$tpl" \
             php_version \
             distro_release \
@@ -130,7 +130,7 @@ generate_bake_file_target() {
 
     tags=$(
         generate_tags "$version_tags" "$distro_tags" \
-        | sed -E 's/(^|[[:space:]])/\1\\${REGISTRY}\/\\${REPO}:/g' \
+        | sed -E 's/(^|[[:space:]])/\1${REGISTRY}\/${REPO}:/g' \
         | format_list \
         | indent 1 4 \
         | trim

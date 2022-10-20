@@ -3,8 +3,6 @@ php_versions:
 - 8.0.23
 - 8.1.10
 
-composer_version: 2.4.1
-
 alpine_releases:
 - alpine3.16
 - alpine3.15
