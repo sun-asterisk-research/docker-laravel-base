@@ -1,6 +1,6 @@
 # NOTE: This file was generated via generate.sh. Don't edit it directly
 
-FROM ghcr.io/sun-asterisk-research/php:8.0.23-nginx-bullseye
+FROM ghcr.io/sun-asterisk-research/php:8.0.24-nginx-bullseye
 
 RUN apt-get update \
     && apt-get install -y cron netcat \
