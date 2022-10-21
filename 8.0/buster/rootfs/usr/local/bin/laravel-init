@@ -4,15 +4,10 @@ set -eo pipefail
 
 source /opt/laravel/utils.sh
 
-make_writable() {
-    chown :www-data "$1"
-    chmod g+w "$1"
-}
-
 cd ${APPLICATION_ROOT:-/srv/app}
 
-if is_standalone && [ -z $(get_config app.key) ]; then
-    echo "warn: application started in standalone mode and no APP_KEY is provided. Generating APP_KEY for single use"
+if is_full_mode && [ -z $(get_config app.key) ]; then
+    warn "application started in full mode and no APP_KEY is provided. Generating APP_KEY for single use"
     export APP_KEY="$(php artisan key:generate --show)"
     echo "$APP_KEY" > /var/run/s6/container_environment/APP_KEY
 fi
@@ -34,27 +29,21 @@ if is_false "${LARAVEL_SKIP_DATABASE:-false}"; then
 
         make_writable "$db_path"
     else
-        if [ "$db_type" != "sqlite" ]; then
-            db_host="$(get_config database.connections.${db_type}.host)"
-            db_port="$(get_config database.connections.${db_type}.port)"
-            db_connection="${db_host}:${db_port}"
+        db_host="$(get_config database.connections.${db_type}.host)"
+        db_port="$(get_config database.connections.${db_type}.port)"
 
-            echo "info: waiting for database at $db_connection..."
+        info "waiting for database at ${db_host}:${db_port}..."
 
-            nc -zw "${LARAVEL_MIGRATION_DB_WAIT_SECONDS:-60}" "$db_connection"
+        wait_for "$db_host" "$db_port" "${LARAVEL_DB_WAIT_SECONDS:-60}" || fatal "timed out waiting for ${db_host}:${db_port}"
+    fi
 
-            if [ "$?" != 0 ]; then
-                echo "fatal: timed out waiting for $db_connection"
-                exit 1
-            fi
-        fi
-
+    if is_true "$LARAVEL_RUN_MIGRATION"; then
         php artisan migrate --force
     fi
 fi
 
 if is_true "${LARAVEL_LINK_STORAGE:-true}" && [ ! -e "public/storage" ]; then
-    mkdir storage/app/public
+    mkdir -p storage/app/public
     make_writable storage/app/public
     php artisan storage:link
 fi
