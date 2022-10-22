@@ -48,7 +48,7 @@ generate_dockerfile() {
     cp -r rootfs "$dir"
 
     if [ "$distro" = "debian" ]; then
-        find "$dir/rootfs/usr/local/bin" -type f -exec sed -i '1s|#!/bin/sh|#!/bin/bash|' {} \;
+        find rootfs/usr/local/bin -type f -exec sh -c "sed '1s|#!/bin/sh|#!/bin/bash|' \$0 > $dir/\$0" {} \;
     fi
 }
 
