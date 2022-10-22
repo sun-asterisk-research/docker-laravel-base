@@ -37,7 +37,7 @@ if is_false "${LARAVEL_SKIP_DATABASE:-false}"; then
         wait_for "$db_host" "$db_port" "${LARAVEL_DB_WAIT_SECONDS:-60}" || fatal "timed out waiting for ${db_host}:${db_port}"
     fi
 
-    if is_true "$LARAVEL_RUN_MIGRATION"; then
+    if is_true "${LARAVEL_RUN_MIGRATION:-true}"; then
         php artisan migrate --force
     fi
 fi
