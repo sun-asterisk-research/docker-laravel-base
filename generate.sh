@@ -126,10 +126,12 @@ format_bake_target() {
 # e.g. generate_bake_file_target 8.1.11-bullseye
 #
 generate_bake_file_target() {
-    eval $(meta_from_full_tag $1)
+    local distro_release_var_name="default_${default_distro}_release"
 
-    [ "$php_minor" = "$default_php_minor" ] && local is_default_version=true
-    [ "$distro_release" = "$default_distro_release" ] && local is_default_distro_release=true
+    local default_php_minor="$(get_minor $default_php_version)"
+    local default_distro_release=${!distro_release_var_name}
+
+    eval $(meta_from_full_tag $1)
 
     local version_tags="$php_minor,$php_version"
 
@@ -178,11 +180,10 @@ generate_bake_file() {
 
     echo "generating $bake_file ..."
 
-    write_warn_edit $bake_file
-
-    local targets=$(echo "$@" | format_bake_target | format_list | indent 1 4 | trim)
-
-    tpl docker-bake.template targets >> $bake_file
+    if [ "$APPEND" != "true" ]; then
+        write_warn_edit $bake_file
+        cat docker-bake.template >> $bake_file
+    fi
 
     for target in $@; do
         generate_bake_file_target $target >> $bake_file
@@ -211,14 +212,15 @@ generate_workflow() {
     tpl ci.yml.template php_minor targets platforms >> $workflow_file
 }
 
-eval $(get_versions)
+# generate_config versions.yml
+# generate_config versions_7.3.yml legacy_7_3_
 
-default_php_major="$(get_major $default_php_version)"
-default_php_minor="$(get_minor $default_php_version)"
-eval default_distro_release=\$"default_${default_distro}_release"
+# eval $(generate_config versions.yml)
 
-if [ "$#" = 0 ]; then
-    generate_all
-elif [ "$1" = "clean" ]; then
+if [ "$1" = "clean" ]; then
+    eval $(generate_config ${2:-versions.yml})
     clean_all
+else
+    eval $(generate_config ${1:-versions.yml})
+    generate_all
 fi

@@ -69,15 +69,16 @@ format_list() {
     echo "]"
 }
 
-get_versions() {
-    cat versions.yml \
+generate_config() {
+    cat $1 \
         | tr "\n" "\r" \
         | sed 's/\r-//g' \
         | tr '\r' '\n' \
         | sed -E \
             -e's/:[^:\/\/]/="/g' \
             -e 's/(.+)$/\1"/g' \
-            -e 's/ *=/=/g'
+            -e 's/ *=/=/g' \
+            -e "s/(^[^[:space:]])/$2\1/g"
 }
 
 write_warn_edit() {
