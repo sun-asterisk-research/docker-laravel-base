@@ -1,12 +1,14 @@
-name: 'PHP {{ php_minor }}'
+# NOTE: This file was generated via generate.sh. Don't edit it directly
+
+name: 'PHP 8.1'
 
 on:
   pull_request:
     paths:
-      - {{ php_minor }}/**
+      - 8.1/**
   push:
     paths:
-      - {{ php_minor }}/**
+      - 8.1/**
 
 defaults:
   run:
@@ -32,7 +34,12 @@ jobs:
     strategy:
       matrix:
         target:
-          {{ targets }}
+          [
+            "8_1_11-bullseye",
+            "8_1_11-buster",
+            "8_1_11-alpine3_16",
+            "8_1_11-alpine3_15",
+          ]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -56,5 +63,5 @@ jobs:
         with:
           targets: ${{ matrix.target }}
           set: |
-            *.platform={{ platforms }}
+            *.platform=linux/amd64,linux/arm,linux/arm64
           push: ${{ github.event_name == 'push' }}

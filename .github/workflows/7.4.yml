@@ -1,10 +1,14 @@
 # NOTE: This file was generated via generate.sh. Don't edit it directly
 
-name: GitHub CI
+name: 'PHP 7.4'
 
 on:
   pull_request:
+    paths:
+      - 7.4/**
   push:
+    paths:
+      - 7.4/**
 
 defaults:
   run:
@@ -35,14 +39,6 @@ jobs:
             "7_4_32-buster",
             "7_4_32-alpine3_16",
             "7_4_32-alpine3_15",
-            "8_0_24-bullseye",
-            "8_0_24-buster",
-            "8_0_24-alpine3_16",
-            "8_0_24-alpine3_15",
-            "8_1_11-bullseye",
-            "8_1_11-buster",
-            "8_1_11-alpine3_16",
-            "8_1_11-alpine3_15",
           ]
     steps:
       - name: Checkout
