@@ -13,7 +13,7 @@ is_false() {
 }
 
 get_config() {
-    php ${APPLICATION_ROOT:-/srv/app}/artisan tinker --execute="echo config('$1')"
+    /opt/laravel/get_config "$1"
 }
 
 has_role() {

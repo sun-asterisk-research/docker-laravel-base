@@ -6,8 +6,8 @@ generate:
 
 clean:
 	@./generate.sh clean
-	@for versions in $$(versions_*.yml); do \
-		APPEND=true ./generate.sh clean $$versions; \
+	@for versions in $$(ls versions_*.yml); do \
+		./generate.sh clean $$versions; \
 	done
 
 all: clean generate

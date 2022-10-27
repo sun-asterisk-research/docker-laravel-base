@@ -212,11 +212,6 @@ generate_workflow() {
     tpl ci.yml.template php_minor targets platforms >> $workflow_file
 }
 
-# generate_config versions.yml
-# generate_config versions_7.3.yml legacy_7_3_
-
-# eval $(generate_config versions.yml)
-
 if [ "$1" = "clean" ]; then
     eval $(generate_config ${2:-versions.yml})
     clean_all

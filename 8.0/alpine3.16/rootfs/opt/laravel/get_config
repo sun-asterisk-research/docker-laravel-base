@@ -1,0 +1,13 @@
+#!/usr/bin/env php
+<?php
+
+$dir = getenv('APPLICATION_ROOT', getcwd());
+
+require $dir.'/vendor/autoload.php';
+$app = require_once $dir.'/bootstrap/app.php';
+
+$app->bootstrapWith([Illuminate\Foundation\Bootstrap\LoadConfiguration::class]);
+
+$val = $app->make('config')->get($argv[1]);
+
+echo is_string($val) ? $val : var_export($val);
