@@ -1,5 +1,5 @@
 #!/command/with-contenv sh
 
-echo "* * * * * php ${APPLICATION_ROOT:-/srv/app}/artisan schedule:run" | crontab -u www-data -
+echo "* * * * * /usr/local/bin/php ${APPLICATION_ROOT:-/srv/app}/artisan schedule:run" | crontab -u www-data -
 
 command -v crond >/dev/null && crond -f || cron -f
