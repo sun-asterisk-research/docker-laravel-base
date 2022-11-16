@@ -35,7 +35,7 @@ Possible values are
 - `full`: full mode, includes all processes
 - `server`: NGINX & PHP-FPM
 - `worker`: queue worker
-- `scheduler`: crontab
+- `cron`: crontab
 
 You can also combine multiple roles for a container, for example `MODE=server+worker`.
 
