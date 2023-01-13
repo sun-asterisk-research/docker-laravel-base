@@ -1,6 +1,6 @@
 # NOTE: This file was generated via generate.sh. Don't edit it directly
 
-FROM ghcr.io/sun-asterisk-research/php:7.4.32-nginx-alpine3.16
+FROM ghcr.io/sun-asterisk-research/php:7.4.33-nginx-alpine3.16
 
 COPY rootfs /
 

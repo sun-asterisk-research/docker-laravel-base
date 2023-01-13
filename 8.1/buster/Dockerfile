@@ -1,6 +1,6 @@
 # NOTE: This file was generated via generate.sh. Don't edit it directly
 
-FROM ghcr.io/sun-asterisk-research/php:8.1.11-nginx-buster
+FROM ghcr.io/sun-asterisk-research/php:8.1.14-nginx-buster
 
 RUN apt-get update \
     && apt-get install -y cron netcat \

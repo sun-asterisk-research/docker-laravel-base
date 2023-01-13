@@ -35,10 +35,9 @@ jobs:
       matrix:
         target:
           [
-            "8_0_24-bullseye",
-            "8_0_24-buster",
-            "8_0_24-alpine3_16",
-            "8_0_24-alpine3_15",
+            "8_0_27-bullseye",
+            "8_0_27-buster",
+            "8_0_27-alpine3_16",
           ]
     steps:
       - name: Checkout

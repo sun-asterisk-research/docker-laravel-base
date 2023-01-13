@@ -1,0 +1,56 @@
+#!/bin/sh
+
+set -eo pipefail
+
+source /opt/laravel/utils.sh
+
+cd ${APPLICATION_ROOT:-/srv/app}
+
+if is_full_mode && [ -z $(get_config app.key) ]; then
+    warn "application started in full mode and no APP_KEY is provided. Generating APP_KEY for single use"
+    export APP_KEY="$(php artisan key:generate --show)"
+    echo "$APP_KEY" > /var/run/s6/container_environment/APP_KEY
+fi
+
+if is_true "${LARAVEL_OPTIMIZE:-true}"; then
+    php artisan optimize
+fi
+
+db_type="$(get_config database.default)"
+
+if is_false "${LARAVEL_SKIP_DATABASE:-false}"; then
+    if [ "$db_type" == "sqlite" ]; then
+        db_path="$(get_config database.connections.sqlite.database)"
+
+        if [ ! -f "$db_path" ]; then
+            mkdir -p "$(dirname $db_path)"
+            touch "$db_path"
+        fi
+
+        make_writable "$db_path"
+    else
+        db_host="$(get_config database.connections.${db_type}.host)"
+        db_port="$(get_config database.connections.${db_type}.port)"
+
+        info "waiting for database at ${db_host}:${db_port}..."
+
+        wait_for "$db_host" "$db_port" "${LARAVEL_DB_WAIT_SECONDS:-60}" || fatal "timed out waiting for ${db_host}:${db_port}"
+    fi
+
+    if is_true "${LARAVEL_RUN_MIGRATION:-true}"; then
+        php artisan migrate --force
+    fi
+fi
+
+if is_true "${LARAVEL_LINK_STORAGE:-true}" && [ ! -e "public/storage" ]; then
+    mkdir -p storage/app/public
+    make_writable storage/app/public
+    php artisan storage:link
+fi
+
+if is_true "${LARAVEL_FIX_PERMISSIONS:-true}"; then
+    find storage/* bootstrap/cache -type d -exec chown :www-data {} \;
+    find storage/* bootstrap/cache -type d -exec chmod g+w {} \;
+    find storage/* bootstrap/cache -type f ! -name .gitignore -exec chown :www-data {} \;
+    find storage/* bootstrap/cache -type f ! -name .gitignore -exec chmod g+w {} \;
+fi
