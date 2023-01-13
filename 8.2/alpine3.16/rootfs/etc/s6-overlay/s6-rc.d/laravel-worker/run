@@ -2,8 +2,14 @@
 
 env_prefix=LARAVEL_WORKER_
 
-while IFS='=' read -r opt val; do
-    extra_opts="$extra_opts --$(echo "${opt#$env_prefix}" | tr '[:upper:]' '[:lower:]' | sed -E 's/_/-/')=$val"
-done < <(env | grep -E "^$env_prefix.+=.+")
+parse_opts() {
+    while IFS='=' read -r opt val; do
+        extra_opts="$extra_opts --$(echo "${opt#$env_prefix}" | tr '[:upper:]' '[:lower:]' | sed -E 's/_/-/')=$val"
+    done
+
+    echo $extra_opts
+}
+
+extra_opts=$(env | grep -E "^$env_prefix.+=.+" | parse_opts)
 
 exec su www-data -s /bin/sh -c "exec php ${APPLICATION_ROOT:-/srv/app}/artisan queue:${LARAVEL_WORKER_COMMAND:-work} $extra_opts"
