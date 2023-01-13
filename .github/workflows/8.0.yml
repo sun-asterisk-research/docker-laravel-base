@@ -19,7 +19,7 @@ jobs:
     name: Verify templating
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Generate
         run: make all
       - name: Check Git status
@@ -39,6 +39,8 @@ jobs:
             "8_0_27-buster",
             "8_0_27-alpine3_16",
           ]
+    env:
+      DOCKER_HUB_PUSH: ${{ (secrets.DOCKER_HUB_IMAGE && secrets.DOCKER_HUB_USERNAME && secrets.DOCKER_HUB_TOKEN) && 'true' || 'false' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -54,6 +56,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+        if: ${{ env.DOCKER_HUB_PUSH == 'true' }}
       - name: GHCR build and push
         uses: docker/bake-action@v2
         env:
@@ -64,3 +72,14 @@ jobs:
           set: |
             *.platform=linux/amd64,linux/arm,linux/arm64
           push: ${{ github.event_name == 'push' }}
+      - name: Build and push to DockerHub
+        uses: docker/bake-action@v2
+        env:
+          REGISTRY: docker.io
+          REPO: ${{ secrets.DOCKER_HUB_IMAGE }}
+        with:
+          targets: ${{ matrix.target }}
+          set: |
+            *.platform=linux/amd64,linux/arm,linux/arm64
+          push: ${{ github.event_name == 'push' }}
+        if: ${{ env.DOCKER_HUB_PUSH == 'true' }}
