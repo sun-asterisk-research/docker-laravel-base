@@ -3,9 +3,11 @@ name: 'PHP {{ php_minor }}'
 on:
   pull_request:
     paths:
+      - .github/workflows/{{ php_minor }}.yml
       - {{ php_minor }}/**
   push:
     paths:
+      - .github/workflows/{{ php_minor }}.yml
       - {{ php_minor }}/**
 
 defaults:

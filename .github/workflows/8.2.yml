@@ -5,9 +5,11 @@ name: 'PHP 8.2'
 on:
   pull_request:
     paths:
+      - .github/workflows/8.2.yml
       - 8.2/**
   push:
     paths:
+      - .github/workflows/8.2.yml
       - 8.2/**
 
 defaults:

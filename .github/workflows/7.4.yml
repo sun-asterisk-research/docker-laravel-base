@@ -5,9 +5,11 @@ name: 'PHP 7.4'
 on:
   pull_request:
     paths:
+      - .github/workflows/7.4.yml
       - 7.4/**
   push:
     paths:
+      - .github/workflows/7.4.yml
       - 7.4/**
 
 defaults:

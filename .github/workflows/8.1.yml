@@ -5,9 +5,11 @@ name: 'PHP 8.1'
 on:
   pull_request:
     paths:
+      - .github/workflows/8.1.yml
       - 8.1/**
   push:
     paths:
+      - .github/workflows/8.1.yml
       - 8.1/**
 
 defaults:
