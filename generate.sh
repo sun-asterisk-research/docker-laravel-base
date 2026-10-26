@@ -4,6 +4,60 @@ set -e
 
 source generate_utils.sh
 
+# Print the value of an optional boolean key from versions*.yml, or the default when unset.
+# Fails when the value is neither true nor false.
+#
+# Usage: bool_key <key name> <default>
+# e.g. bool_key exact_tags_only false
+#
+bool_key() {
+    local value="${!1:-$2}"
+
+    if [ "$value" != true ] && [ "$value" != false ]; then
+        echo "$1 must be true or false, got '$value'" >&2
+        return 1
+    fi
+
+    echo "$value"
+}
+
+# Print "@sha256:<hex>" for an optional digest key from versions*.yml, or nothing when unset.
+# The key holds the bare 64-char hex: generate_config can't carry a ":" inside a value.
+#
+# Usage: digest_suffix <key name>
+# e.g. digest_suffix base_image_sha256
+#
+digest_suffix() {
+    local value="${!1}"
+
+    if [ -z "$value" ]; then
+        return 0
+    fi
+
+    if ! [[ "$value" =~ ^[0-9a-f]{64}$ ]]; then
+        echo "$1 must be a 64-char hex sha256 without the 'sha256:' prefix, got '$value'" >&2
+        return 1
+    fi
+
+    echo "@sha256:$value"
+}
+
+# Check the optional keys of the loaded versions*.yml before anything is written.
+# An exact tag is meant to be pinned by digest downstream, so exact_tags_only: true
+# also requires the base image to be pinned (base_image_sha256).
+#
+validate_config() {
+    local exact_only
+    exact_only=$(bool_key exact_tags_only false) || return 1
+    bool_key dockerhub_push true > /dev/null || return 1
+    digest_suffix base_image_sha256 > /dev/null || return 1
+
+    if [ "$exact_only" = true ] && [ -z "$base_image_sha256" ]; then
+        echo "base_image_sha256 is required when exact_tags_only is true" >&2
+        return 1
+    fi
+}
+
 # Generate a script that can be used with `eval` to set meta variables from a tag
 #
 # Usage: meta_from_full_tag <full tag>
@@ -41,6 +95,10 @@ generate_dockerfile() {
     local dir="$php_minor/$distro_release"
     local dockerfile="$dir/Dockerfile"
 
+    # Optional pin of the base php image by digest (key base_image_sha256)
+    local base_image_digest
+    base_image_digest=$(digest_suffix base_image_sha256)
+
     mkdir -p "$dir"
 
     write_warn_edit $dockerfile
@@ -50,6 +108,7 @@ generate_dockerfile() {
             php_version \
             distro_release \
             extra_steps \
+            base_image_digest \
             >> $dockerfile
     done
 
@@ -153,6 +212,15 @@ generate_bake_file_target() {
         distro_tags="$distro_tags,default"
     fi
 
+    # Opt-in: publish only the immutable full tag, without minor/major versions or aliases
+    local exact_only
+    exact_only=$(bool_key exact_tags_only false)
+
+    if [ "$exact_only" = true ]; then
+        version_tags="$php_version"
+        distro_tags="$distro_release"
+    fi
+
     tags=$(
         IFS=',' generate_tags "$version_tags" "$distro_tags" \
         | sed -E 's/(^|[[:space:]])/\1${REGISTRY}\/${REPO}:/g' \
@@ -209,7 +277,11 @@ generate_workflow() {
 
     local platforms=$(echo $platforms | sed 's/ /,/g')
 
-    tpl ci.yml.template php_minor targets platforms >> $workflow_file
+    # Docker Hub steps also need the secrets; dockerhub_push: false turns them off for this file
+    local dockerhub_push_enabled
+    dockerhub_push_enabled=$(bool_key dockerhub_push true)
+
+    tpl ci.yml.template php_minor targets platforms dockerhub_push=dockerhub_push_enabled >> $workflow_file
 }
 
 if [ "$1" = "clean" ]; then
@@ -217,5 +289,6 @@ if [ "$1" = "clean" ]; then
     clean_all
 else
     eval $(generate_config ${1:-versions.yml})
+    validate_config || { echo "${1:-versions.yml}: invalid config, nothing generated" >&2; exit 1; }
     generate_all
 fi

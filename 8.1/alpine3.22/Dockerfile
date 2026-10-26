@@ -1,10 +1,6 @@
 # NOTE: This file was generated via generate.sh. Don't edit it directly
 
-FROM ghcr.io/sun-asterisk-research/php:8.1.14-nginx-bullseye
-
-RUN apt-get update \
-    && apt-get install -y cron netcat \
-    && rm -rf /var/lib/apt/lists/*
+FROM ghcr.io/sun-asterisk-research/php:8.1.34-nginx-alpine3.22@sha256:52414238eb01bf163d0df29bb7c10adb04559a89cdd9242c8794c35defe7e998
 
 COPY rootfs /
 

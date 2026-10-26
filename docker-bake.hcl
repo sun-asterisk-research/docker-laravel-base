@@ -8,70 +8,6 @@ variable "REPO" {
     default = "sun-asterisk-research/laravel-base"
 }
 
-target "8_1_14-bullseye" {
-    context = "./8.1/bullseye"
-    cache-from = [
-        "${REGISTRY}/${REPO}:8.1-bullseye"
-    ]
-    tags = [
-        "${REGISTRY}/${REPO}:8.1-bullseye",
-        "${REGISTRY}/${REPO}:8.1",
-        "${REGISTRY}/${REPO}:8.1.14-bullseye",
-        "${REGISTRY}/${REPO}:8.1.14",
-    ]
-}
-
-target "8_1-bullseye" {
-    inherits = ["8_1_14-bullseye"]
-}
-
-target "8_1_14-buster" {
-    context = "./8.1/buster"
-    cache-from = [
-        "${REGISTRY}/${REPO}:8.1-buster"
-    ]
-    tags = [
-        "${REGISTRY}/${REPO}:8.1-buster",
-        "${REGISTRY}/${REPO}:8.1.14-buster",
-    ]
-}
-
-target "8_1-buster" {
-    inherits = ["8_1_14-buster"]
-}
-
-target "8_1_14-alpine3_17" {
-    context = "./8.1/alpine3.17"
-    cache-from = [
-        "${REGISTRY}/${REPO}:8.1-alpine3.17"
-    ]
-    tags = [
-        "${REGISTRY}/${REPO}:8.1-alpine3.17",
-        "${REGISTRY}/${REPO}:8.1-alpine",
-        "${REGISTRY}/${REPO}:8.1.14-alpine3.17",
-        "${REGISTRY}/${REPO}:8.1.14-alpine",
-    ]
-}
-
-target "8_1-alpine3_17" {
-    inherits = ["8_1_14-alpine3_17"]
-}
-
-target "8_1_14-alpine3_16" {
-    context = "./8.1/alpine3.16"
-    cache-from = [
-        "${REGISTRY}/${REPO}:8.1-alpine3.16"
-    ]
-    tags = [
-        "${REGISTRY}/${REPO}:8.1-alpine3.16",
-        "${REGISTRY}/${REPO}:8.1.14-alpine3.16",
-    ]
-}
-
-target "8_1-alpine3_16" {
-    inherits = ["8_1_14-alpine3_16"]
-}
-
 target "8_2_1-bullseye" {
     context = "./8.2/bullseye"
     cache-from = [
@@ -329,4 +265,18 @@ target "8_0_27-alpine3_16" {
 
 target "8_0-alpine3_16" {
     inherits = ["8_0_27-alpine3_16"]
+}
+
+target "8_1_34-alpine3_22" {
+    context = "./8.1/alpine3.22"
+    cache-from = [
+        "${REGISTRY}/${REPO}:8.1-alpine3.22"
+    ]
+    tags = [
+        "${REGISTRY}/${REPO}:8.1.34-alpine3.22",
+    ]
+}
+
+target "8_1-alpine3_22" {
+    inherits = ["8_1_34-alpine3_22"]
 }
