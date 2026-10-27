@@ -284,11 +284,24 @@ generate_workflow() {
     tpl ci.yml.template php_minor targets platforms dockerhub_push=dockerhub_push_enabled >> $workflow_file
 }
 
-if [ "$1" = "clean" ]; then
-    eval $(generate_config ${2:-versions.yml})
-    clean_all
-else
-    eval $(generate_config ${1:-versions.yml})
-    validate_config || { echo "${1:-versions.yml}: invalid config, nothing generated" >&2; exit 1; }
-    generate_all
+# Usage: generate.sh [clean|check] [versions file]
+case "$1" in
+    clean|check) mode="$1"; versions_file="${2:-versions.yml}" ;;
+    *) mode=generate; versions_file="${1:-versions.yml}" ;;
+esac
+
+if [ ! -f "$versions_file" ]; then
+    echo "$versions_file: no such versions file" >&2
+    exit 1
 fi
+
+eval $(generate_config "$versions_file")
+
+case "$mode" in
+    clean) clean_all ;;
+    check) validate_config || { echo "$versions_file: invalid config" >&2; exit 1; } ;;
+    generate)
+        validate_config || { echo "$versions_file: invalid config, nothing generated" >&2; exit 1; }
+        generate_all
+        ;;
+esac
