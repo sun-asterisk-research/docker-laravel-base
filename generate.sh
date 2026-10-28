@@ -306,6 +306,12 @@ if [ ! -f "$versions_file" ]; then
     exit 1
 fi
 
+# generate_config cannot parse a value containing ':', so catch a prefixed digest before eval
+if grep -qE "^base_image_sha256:[[:space:]]*[\"']?sha256:" "$versions_file"; then
+    echo "$versions_file: base_image_sha256 must be a 64-char hex sha256 without the 'sha256:' prefix" >&2
+    exit 1
+fi
+
 eval $(generate_config "$versions_file")
 
 case "$mode" in
