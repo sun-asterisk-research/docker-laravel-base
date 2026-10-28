@@ -1,5 +1,4 @@
 php_versions:
-- 8.1.14
 - 8.2.1
 
 alpine_releases:

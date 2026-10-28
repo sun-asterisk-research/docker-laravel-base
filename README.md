@@ -7,7 +7,7 @@ A base image for Laravel applications. Built upon the official PHP image, bootst
 Create a Dockerfile in your application directory.
 
 ```Dockerfile
-FROM ghcr.io/sun-asterisk-research/laravel-base:8.1-alpine3.16
+FROM ghcr.io/sun-asterisk-research/laravel-base:8.2-alpine3.16
 
 COPY . .
 ```
