@@ -281,7 +281,18 @@ generate_workflow() {
     local dockerhub_push_enabled
     dockerhub_push_enabled=$(bool_key dockerhub_push true)
 
-    tpl ci.yml.template php_minor targets platforms dockerhub_push=dockerhub_push_enabled >> $workflow_file
+    # Exact-tag builds publish to ghcr with GITHUB_TOKEN, so they ask for packages: write
+    # themselves rather than depend on the org default token permissions
+    local workflow_permissions=""
+    local docker_permissions=""
+
+    if [ "$(bool_key exact_tags_only false)" = true ]; then
+        workflow_permissions=$'permissions:\n  contents: read\n\n'
+        docker_permissions=$'    permissions:\n      contents: read\n      packages: write\n'
+    fi
+
+    tpl ci.yml.template php_minor targets platforms dockerhub_push=dockerhub_push_enabled \
+        workflow_permissions docker_permissions >> $workflow_file
 }
 
 # Usage: generate.sh [clean|check] [versions file]
