@@ -3,18 +3,16 @@ php_versions:
 
 alpine_releases:
 - alpine3.16
-- alpine3.15
 
 default_php_7_version: 7.4
-default_distro: debian
+default_distro: alpine
 default_alpine_release: alpine3.16
-default_debian_release: bullseye
-
-debian_releases:
-- bullseye
-- buster
 
 platforms:
 - linux/amd64
-- linux/arm
+- linux/arm/v7
 - linux/arm64
+
+exact_tags_only: true
+dockerhub_push: false
+base_image_sha256: ccd57c94a1ec0734f926ce55550c528cfabaa4f467a629e77974e61673d32061
